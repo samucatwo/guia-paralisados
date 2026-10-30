@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useMemo, useState } from 'react'
 import { ArrowLeft, BookOpen, ClipboardCheck, Clock3, Info, ListChecks, Search, ShieldCheck } from 'lucide-react'
 import { CategoryCard } from './components/CategoryCard'
 import { Header } from './components/Header'
@@ -8,6 +8,9 @@ import { ReformaEscolar } from './pages/ReformaEscolar'
 import { EscolaDesativada } from './pages/EscolaDesativada'
 import { MudancaEndereco } from './pages/MudancaEndereco'
 import './App.css'
+
+const TimestampEditor = lazy(() => import('./pages/TimestampEditor').then((module) => ({ default: module.TimestampEditor })))
+const Notes = lazy(() => import('./pages/Notes').then((module) => ({ default: module.Notes })))
 
 function App() {
   const [activeView, setActiveView] = useState('inicio')
@@ -20,19 +23,24 @@ function App() {
     localStorage.setItem('eace-theme', theme)
   }, [theme])
 
+  useEffect(() => {
+    document.title = activeView === 'notas' ? 'Notas | GUIA EACE' : activeView === 'timestamp' ? 'Timestamp Fotográfico | GUIA EACE' : 'GUIA EACE'
+  }, [activeView])
+
   const filteredCategories = useMemo(() => categories.filter((category) => `${category.title} ${category.description}`.toLowerCase().includes(searchTerm.toLowerCase())), [searchTerm])
   const navigate = (view) => { setActiveView(view); setIsSidebarOpen(false); window.scrollTo({ top: 0, behavior: 'smooth' }) }
   const activeCategory = categories.find((category) => category.id === activeView)
+  const showCategorySearch = activeView === 'inicio' || activeView === 'paralizados'
 
   return (
     <div className="app-shell">
       <Sidebar activeView={activeView} onNavigate={navigate} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} categories={categories} />
       <div className="main-shell">
-        <Header theme={theme} onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} onOpenMenu={() => setIsSidebarOpen(true)} searchTerm={searchTerm} onSearch={setSearchTerm} />
+        <Header theme={theme} onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} onOpenMenu={() => setIsSidebarOpen(true)} searchTerm={searchTerm} onSearch={setSearchTerm} activeView={activeView} showSearch={showCategorySearch} />
         <main className="main-content">
-          {activeView === 'reforma-escolar' ? <ReformaEscolar onBack={() => navigate('paralizados')} /> : activeView === 'escola-desativada' ? <EscolaDesativada onBack={() => navigate('paralizados')} /> : activeView === 'mudanca-endereco' ? <MudancaEndereco onBack={() => navigate('paralizados')} /> : activeCategory ? <CategoryPage category={activeCategory} onBack={() => navigate('inicio')} /> : activeView === 'paralizados' ? <CategoriesPage categories={filteredCategories} onOpen={navigate} searchTerm={searchTerm} /> : <HomePage categories={filteredCategories} onOpen={navigate} />}
+          {activeView === 'timestamp' ? <Suspense fallback={<div className="empty-state">Carregando editor fotográfico...</div>}><TimestampEditor /></Suspense> : activeView === 'notas' ? <Suspense fallback={<div className="empty-state">Carregando notas...</div>}><Notes /></Suspense> : activeView === 'reforma-escolar' ? <ReformaEscolar onBack={() => navigate('paralizados')} /> : activeView === 'escola-desativada' ? <EscolaDesativada onBack={() => navigate('paralizados')} /> : activeView === 'mudanca-endereco' ? <MudancaEndereco onBack={() => navigate('paralizados')} /> : activeCategory ? <CategoryPage category={activeCategory} onBack={() => navigate('inicio')} /> : activeView === 'paralizados' ? <CategoriesPage categories={filteredCategories} onOpen={navigate} searchTerm={searchTerm} /> : <HomePage categories={filteredCategories} onOpen={navigate} />}
         </main>
-        <footer className="footer"><span>GUIA PARALISADOS EACE</span><span>Base estrutural v1.0</span></footer>
+        <footer className="footer"><span>GUIA EACE</span><span>Base estrutural v1.0</span></footer>
       </div>
     </div>
   )
@@ -40,7 +48,7 @@ function App() {
 
 function HomePage({ categories: visibleCategories, onOpen }) {
   return <>
-    <section className="welcome-block"><div className="eyebrow"><span className="eyebrow-line" /> Central de orientação</div><h1>Guia de <em>paralisados</em><br />do projeto EACE.</h1><p>Consulte rapidamente a estrutura de atendimento para cada situação e acompanhe o que precisa ser organizado.</p></section>
+    <section className="welcome-block"><div className="eyebrow"><span className="eyebrow-line" /> Central de orientação</div><h1>GUIA <em>EACE</em></h1><p>Consulte procedimentos operacionais e notas técnicas compartilhadas do projeto EACE.</p></section>
     <section className="metrics-row"><div className="metric-card accent-metric"><span className="metric-icon"><BookOpen size={18} /></span><strong>03</strong><span>Categorias disponíveis</span></div><div className="metric-card"><span className="metric-icon"><ClipboardCheck size={18} /></span><strong>—</strong><span>Procedimentos publicados</span></div><div className="metric-card"><span className="metric-icon"><Clock3 size={18} /></span><strong>Em breve</strong><span>Conteúdo operacional</span></div></section>
     <div className="section-heading"><div><span className="eyebrow">Navegação rápida</span><h2>Categorias de paralisação</h2></div><button className="text-button" onClick={() => onOpen('paralizados')}>Ver todas <ArrowLeft size={15} className="rotate-180" /></button></div>
     <div className="category-grid">{visibleCategories.map((category) => <CategoryCard key={category.id} category={category} onOpen={() => onOpen(category.id)} />)}</div>

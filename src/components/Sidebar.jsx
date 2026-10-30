@@ -1,4 +1,4 @@
-import { ChevronRight, Home, LayoutList, X } from 'lucide-react'
+import { Camera, ChevronRight, Home, LayoutList, StickyNote, X } from 'lucide-react'
 
 export function Sidebar({ activeView, onNavigate, isOpen, onClose, categories }) {
   return (
@@ -8,8 +8,8 @@ export function Sidebar({ activeView, onNavigate, isOpen, onClose, categories })
         <div className="sidebar-brand">
           <div className="brand-mark">E</div>
           <div>
-            <strong>GUIA</strong>
-            <span>PARALISADOS EACE</span>
+            <strong>GUIA EACE</strong>
+            <span>ORIENTAÇÃO OPERACIONAL</span>
           </div>
           <button className="icon-button mobile-close" onClick={onClose} aria-label="Fechar menu"><X size={18} /></button>
         </div>
@@ -29,6 +29,12 @@ export function Sidebar({ activeView, onNavigate, isOpen, onClose, categories })
               return <button key={category.id} className={`nav-item nested ${activeView === category.id ? 'active' : ''}`} onClick={() => onNavigate(category.id)}><Icon size={16} /><span>{category.shortTitle}</span></button>
             })}
           </div>
+          <button className={`nav-item notes-nav-item ${activeView === 'notas' ? 'active' : ''}`} onClick={() => onNavigate('notas')}>
+            <StickyNote size={18} /><span>Notas</span>{activeView === 'notas' && <ChevronRight size={15} />}
+          </button>
+          <button className={`nav-item timestamp-nav-item ${activeView === 'timestamp' ? 'active' : ''}`} onClick={() => onNavigate('timestamp')}>
+            <Camera size={18} /><span>Timestamp Fotográfico</span>{activeView === 'timestamp' && <ChevronRight size={15} />}
+          </button>
         </nav>
 
         <div className="sidebar-footer">

@@ -2,48 +2,48 @@
 
 :root {
   font-family: 'DM Sans', sans-serif;
-  color: #dfe7e4;
-  background: #111817;
+  color: #dce6f3;
+  background: #0b1424;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   --sans: 'DM Sans', sans-serif;
   --heading: 'Space Grotesk', sans-serif;
   --mono: 'DM Sans', sans-serif;
-  --bg: #111817;
-  --sidebar: #151d1c;
-  --surface: #192321;
-  --surface-hover: #202c29;
-  --border: #293532;
-  --border-strong: #40504b;
-  --text: #9aa9a4;
-  --text-h: #edf4f0;
-  --text-muted: #9aa9a4;
-  --text-soft: #657570;
-  --accent: #d2ad68;
-  --accent-bg: rgba(210, 173, 104, .12);
-  --accent-border: rgba(210, 173, 104, .45);
-  --code-bg: #192321;
-  --shadow: 0 16px 34px rgba(0, 0, 0, .18);
+  --bg: #0b1424;
+  --sidebar: #08101d;
+  --surface: #111f33;
+  --surface-hover: #192b44;
+  --border: #243650;
+  --border-strong: #3a5272;
+  --text: #a9bad0;
+  --text-h: #edf4fc;
+  --text-muted: #a9bad0;
+  --text-soft: #7185a1;
+  --accent: #5da9ff;
+  --accent-bg: rgba(64, 145, 237, .14);
+  --accent-border: rgba(93, 169, 255, .48);
+  --code-bg: #111f33;
+  --shadow: 0 16px 34px rgba(0, 0, 0, .22);
 }
 
 :root[data-theme='light'] {
-  color: #25322f;
-  background: #f3f5f1;
-  --bg: #f3f5f1;
-  --sidebar: #e9eeea;
-  --surface: #fbfcfa;
-  --surface-hover: #eef3ef;
-  --border: #dce4df;
-  --border-strong: #bdcac3;
-  --text: #62716b;
-  --text-h: #1d2b27;
-  --text-muted: #62716b;
-  --text-soft: #8a9891;
-  --accent-bg: rgba(117, 148, 128, .13);
-  --accent-border: rgba(117, 148, 128, .42);
-  --code-bg: #fbfcfa;
-  --shadow: 0 16px 34px rgba(40, 60, 50, .1);
+  color: #263a55;
+  background: #f2f6fc;
+  --bg: #f2f6fc;
+  --sidebar: #e6eef9;
+  --surface: #ffffff;
+  --surface-hover: #eaf2fd;
+  --border: #d4dfef;
+  --border-strong: #b6c8df;
+  --text: #5c6f89;
+  --text-h: #152b47;
+  --text-muted: #5c6f89;
+  --text-soft: #8193aa;
+  --accent-bg: rgba(40, 119, 213, .1);
+  --accent-border: rgba(40, 119, 213, .35);
+  --code-bg: #ffffff;
+  --shadow: 0 16px 34px rgba(40, 70, 110, .1);
 }
 
 * { box-sizing: border-box; }
