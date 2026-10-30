@@ -1,5 +1,6 @@
 .timestamp-page { display: flex; flex-direction: column; gap: 20px; animation: rise .35s ease both; }
 .timestamp-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
+.timestamp-heading-actions { display: flex; align-items: center; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
 .timestamp-title-group { display: flex; align-items: flex-start; gap: 15px; }
 .timestamp-title-icon { display: grid; flex: 0 0 46px; place-items: center; width: 46px; height: 46px; margin-top: 5px; border: 1px solid var(--accent-border); border-radius: 12px; color: var(--accent); background: var(--accent-bg); }
 .timestamp-title-group h1 { margin: 8px 0 6px; color: var(--text-h); font: 700 clamp(23px, 3vw, 32px)/1.15 var(--heading); letter-spacing: -.03em; }
@@ -39,12 +40,17 @@
 .timestamp-control-section { display: flex; flex-direction: column; gap: 12px; padding: 16px; border-bottom: 1px solid var(--border); }
 .timestamp-control-section:last-child { border-bottom: 0; }
 .timestamp-control-section h3 { margin: 0; color: var(--text-h); font: 600 11px var(--heading); }
+.timestamp-datetime-heading { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.timestamp-mode-toggle { display: inline-flex; padding: 2px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); }
+.timestamp-mode-toggle button { min-height: 25px; padding: 0 7px; border: 0; border-radius: 4px; color: var(--text-soft); background: transparent; font-size: 8px; font-weight: 750; letter-spacing: .04em; cursor: pointer; }
+.timestamp-mode-toggle button.is-selected { color: var(--text-h); background: var(--accent-bg); box-shadow: inset 0 0 0 1px var(--accent-border); }
 .timestamp-control-grid { display: grid; gap: 11px; }
 .two-controls { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .timestamp-control { display: flex; min-width: 0; flex-direction: column; gap: 6px; color: var(--text-muted); font-size: 9px; }
 .timestamp-control > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .timestamp-control input:not([type='range']):not([type='color']), .timestamp-control select, .timestamp-preset-row input, .timestamp-preset-row select { width: 100%; min-width: 0; height: 34px; padding: 0 8px; border: 1px solid var(--border); border-radius: 5px; color: var(--text-h); background: var(--bg); font-size: 10px; }
 .timestamp-control input[type='range'], .timestamp-style-toggles input[type='range'] { width: 100%; accent-color: var(--accent); }
+.timestamp-control input:disabled { opacity: .58; cursor: not-allowed; }
 .timestamp-control input[type='color'], .timestamp-style-toggles input[type='color'] { width: 30px; height: 27px; padding: 2px; border: 1px solid var(--border); border-radius: 5px; background: var(--bg); cursor: pointer; }
 .color-control > div { display: flex; align-items: center; gap: 9px; height: 34px; }
 .color-control input[type='range'] { flex: 1; }
@@ -113,7 +119,7 @@
 
 @media (max-width: 620px) {
   .timestamp-heading { align-items: flex-start; flex-direction: column; }
-  .timestamp-reset-button { align-self: flex-end; }
+  .timestamp-heading-actions { justify-content: flex-start; }
   .timestamp-uploader { min-height: 330px; }
   .timestamp-preview-stage { min-height: 230px; padding: 12px; }
   .timestamp-image-frame > img { max-height: 52vh; }

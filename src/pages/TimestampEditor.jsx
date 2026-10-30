@@ -3,6 +3,7 @@ import { AlertCircle, ArrowDown, ArrowUp, Camera, Check, Clock3, Eye, EyeOff, Fi
 import './timestamp.css'
 
 const PRESETS_STORAGE_KEY = 'eace-timestamp-presets'
+const SETTINGS_STORAGE_KEY = 'eace-timestamp-settings'
 const TIMESTAMP_FONTS = [
   { name: 'Arial Narrow', family: '"Arial Narrow", Arial, sans-serif' },
   { name: 'Arial', family: 'Arial, sans-serif' },
@@ -18,13 +19,15 @@ const TIMESTAMP_FONTS = [
   { name: 'Times New Roman', family: '"Times New Roman", serif' },
 ]
 
-const DEFAULT_FIELDS = [
-  { id: 'coordinates', label: 'Coordenadas', value: '', visible: true },
-  { id: 'address', label: 'Endereço / local', value: '', visible: true },
-  { id: 'city', label: 'Cidade', value: '', visible: true },
-  { id: 'state', label: 'Estado', value: '', visible: true },
-  { id: 'identifier', label: 'Identificador', value: '', visible: true },
+const DEFAULT_FIELD_DEFINITIONS = [
+  { id: 'datetime', label: 'Data e hora', value: '', isDateTime: true },
+  { id: 'coordinates', label: 'Coordenadas', value: '-3,3927S -44,0256W' },
+  { id: 'address', label: 'Endereço/local', value: 'Estrada Sem Nome' },
+  { id: 'city', label: 'Cidade', value: 'Presidente Vargas' },
+  { id: 'state', label: 'Estado', value: 'Maranhão' },
+  { id: 'identifier', label: 'Identificador', value: 'MAMINFO' },
 ]
+const DEFAULT_FIELD_MAP = new Map(DEFAULT_FIELD_DEFINITIONS.map((field) => [field.id, field]))
 
 const DEFAULT_STYLE = {
   font: TIMESTAMP_FONTS[0].name,
@@ -64,32 +67,134 @@ function getLocalDateTime() {
   }
 }
 
-function getDefaultFields(dateTime) {
-  return [
-    { id: 'datetime', label: 'Data e hora', value: '', visible: true, isDateTime: true },
-    ...DEFAULT_FIELDS.map((field) => ({ ...field })),
-  ].map((field) => field.id === 'datetime' ? { ...field, value: formatDateTime(dateTime.date, dateTime.time, 'dd/MM/yyyy HH:mm:ss', 'local') } : field)
+function getDefaultFields(dateTime = getLocalDateTime()) {
+  return DEFAULT_FIELD_DEFINITIONS.map((field) => ({
+    ...field,
+    value: field.isDateTime ? formatDateTime(dateTime.date, dateTime.time, 'camera', 'local') : field.value,
+    visible: true,
+  }))
 }
 
 function formatDateTime(date, time, format, zone) {
   if (!date) return ''
   const source = new Date(`${date}T${time || '00:00:00'}`)
   if (Number.isNaN(source.getTime())) return ''
-  const [year, month, day] = date.split('-').map(Number)
-  const monthNames = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro']
-  const timeForZone = zone === 'local' ? time : new Intl.DateTimeFormat('pt-BR', { timeZone: zone === 'UTC' ? 'UTC' : 'America/Fortaleza', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(source)
-  let dateForZone = { year, month, day }
-  if (zone !== 'local') {
-    const parts = new Intl.DateTimeFormat('en-CA', { timeZone: zone === 'UTC' ? 'UTC' : 'America/Fortaleza', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(source)
-    dateForZone = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, Number(part.value)]))
+  const options = {
+    timeZone: zone === 'local' ? undefined : zone,
+    day: '2-digit',
+    month: format === 'camera' ? 'short' : '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
   }
-  const { year: formattedYear, month: formattedMonth, day: formattedDay } = dateForZone
+  const parts = new Intl.DateTimeFormat('pt-BR', options).formatToParts(source)
+  const formatted = Object.fromEntries(parts.filter((part) => part.type !== 'literal').map((part) => [part.type, part.value]))
+  const { year: formattedYear, month: formattedMonth, day: formattedDay } = formatted
+  const timeForZone = `${formatted.hour}:${formatted.minute}:${formatted.second}`
+  if (format === 'camera') return `${formattedDay} de ${formattedMonth} de ${formattedYear} ${timeForZone}`
   const paddedMonth = String(formattedMonth).padStart(2, '0')
   const paddedDay = String(formattedDay).padStart(2, '0')
-  if (format === 'long') return `${formattedDay} de ${monthNames[formattedMonth - 1]} de ${formattedYear} ${timeForZone}`
-  if (format === 'short') return `${paddedDay} ${monthNames[formattedMonth - 1].slice(0, 3).toLocaleUpperCase('pt-BR')} ${formattedYear} ${timeForZone.slice(0, 5)}`
+  if (format === 'long') return `${formattedDay} de ${formattedMonth} de ${formattedYear} ${timeForZone}`
+  if (format === 'short') return `${formattedDay} ${formattedMonth.replace('.', '').toLocaleUpperCase('pt-BR')} ${formattedYear} ${timeForZone.slice(0, 5)}`
   if (format === 'iso') return `${formattedYear}-${paddedMonth}-${paddedDay} ${timeForZone}`
   return `${paddedDay}/${paddedMonth}/${formattedYear} ${timeForZone}`
+}
+
+function normalizeFields(savedFields, dateTime) {
+  const fieldsById = new Map()
+  if (Array.isArray(savedFields)) {
+    savedFields.forEach((field) => {
+      if (field && typeof field.id === 'string') fieldsById.set(field.id, field)
+    })
+  }
+
+  const defaults = getDefaultFields()
+  const normalizedDefaults = defaults.map((defaultField) => {
+    const savedField = fieldsById.get(defaultField.id)
+    if (!savedField) return { ...defaultField }
+    const savedValue = typeof savedField.value === 'string' ? savedField.value : ''
+    return {
+      ...defaultField,
+      ...savedField,
+      id: defaultField.id,
+      isDateTime: Boolean(defaultField.isDateTime),
+      isCustom: false,
+      label: typeof savedField.label === 'string' && savedField.label ? savedField.label : defaultField.label,
+      value: !savedValue.trim() && savedField.visible !== false ? defaultField.value : savedValue,
+      visible: typeof savedField.visible === 'boolean' ? savedField.visible : true,
+    }
+  })
+
+  const orderedFields = []
+  const normalizedById = new Map(normalizedDefaults.map((field) => [field.id, field]))
+  const seenIds = new Set()
+  if (Array.isArray(savedFields)) {
+    savedFields.forEach((field) => {
+      if (normalizedById.has(field?.id) && !seenIds.has(field.id)) {
+        orderedFields.push(normalizedById.get(field.id))
+        seenIds.add(field.id)
+      } else if (typeof field?.id === 'string' && !DEFAULT_FIELD_MAP.has(field.id) && typeof field.label === 'string') {
+        if (!seenIds.has(field.id)) {
+          orderedFields.push({ ...field, isCustom: true, value: typeof field.value === 'string' ? field.value : '', visible: typeof field.visible === 'boolean' ? field.visible : true })
+          seenIds.add(field.id)
+        }
+      }
+    })
+  }
+  normalizedDefaults.forEach((field, defaultIndex) => {
+    if (seenIds.has(field.id)) return
+    const nextDefault = normalizedDefaults.slice(defaultIndex + 1).find((candidate) => seenIds.has(candidate.id))
+    const nextDefaultIndex = nextDefault ? orderedFields.findIndex((candidate) => candidate.id === nextDefault.id) : -1
+    const firstCustomIndex = orderedFields.findIndex((candidate) => !DEFAULT_FIELD_MAP.has(candidate.id))
+    const insertionIndex = nextDefaultIndex >= 0 ? nextDefaultIndex : firstCustomIndex >= 0 ? firstCustomIndex : orderedFields.length
+    orderedFields.splice(insertionIndex, 0, field)
+    seenIds.add(field.id)
+  })
+
+  const datetimeField = orderedFields.find((field) => field.id === 'datetime')
+  datetimeField.value = formatDateTime(dateTime.date, dateTime.time, 'camera', 'local')
+  return orderedFields
+}
+
+function loadEditorSettings() {
+  const now = getLocalDateTime()
+  const defaults = {
+    fields: getDefaultFields(now),
+    dateTime: now,
+    dateTimeMode: 'automatic',
+    dateFormat: 'camera',
+    timeZone: 'local',
+    style: { ...DEFAULT_STYLE },
+  }
+  try {
+    const stored = JSON.parse(localStorage.getItem(SETTINGS_STORAGE_KEY) || 'null')
+    if (!stored || typeof stored !== 'object') return defaults
+
+    const dateTime = {
+      date: typeof stored.dateTime?.date === 'string' && stored.dateTime.date ? stored.dateTime.date : now.date,
+      time: typeof stored.dateTime?.time === 'string' && stored.dateTime.time ? stored.dateTime.time : now.time,
+    }
+    const savedMode = stored.dateTimeMode ?? stored.datetimeMode ?? stored.dateMode
+    const dateTimeMode = savedMode === 'manual' || savedMode === 'auto' || savedMode === 'automatic'
+      ? savedMode === 'manual' ? 'manual' : 'automatic'
+      : stored.dateTime?.date && stored.dateTime?.time ? 'manual' : 'automatic'
+    const resolvedDateTime = dateTimeMode === 'automatic' ? now : dateTime
+    const storedStyle = stored.style && typeof stored.style === 'object' ? stored.style : {}
+
+    return {
+      fields: normalizeFields(stored.fields, resolvedDateTime),
+      dateTime: resolvedDateTime,
+      dateTimeMode,
+      dateFormat: ['camera', 'dd/MM/yyyy HH:mm:ss', 'long', 'short', 'iso'].includes(stored.dateFormat) ? stored.dateFormat : 'camera',
+      timeZone: dateTimeMode === 'automatic' || !['local', 'America/Fortaleza', 'UTC'].includes(stored.timeZone) ? 'local' : stored.timeZone,
+      style: { ...DEFAULT_STYLE, ...storedStyle },
+    }
+  } catch (error) {
+    console.error('Não foi possível carregar as configurações salvas do timestamp.', error)
+    return defaults
+  }
 }
 
 function readPresets() {
@@ -109,14 +214,16 @@ function getAnchorTransform(alignment, anchor) {
 }
 
 export function TimestampEditor() {
+  const [initialSettings] = useState(loadEditorSettings)
   const [image, setImage] = useState(null)
   const [error, setError] = useState('')
   const [isDragging, setIsDragging] = useState(false)
-  const [dateTime, setDateTime] = useState(getLocalDateTime)
-  const [dateFormat, setDateFormat] = useState('dd/MM/yyyy HH:mm:ss')
-  const [timeZone, setTimeZone] = useState('local')
-  const [fields, setFields] = useState(() => getDefaultFields(getLocalDateTime()))
-  const [style, setStyle] = useState(DEFAULT_STYLE)
+  const [dateTime, setDateTime] = useState(initialSettings.dateTime)
+  const [dateTimeMode, setDateTimeMode] = useState(initialSettings.dateTimeMode)
+  const [dateFormat, setDateFormat] = useState(initialSettings.dateFormat)
+  const [timeZone, setTimeZone] = useState(initialSettings.timeZone)
+  const [fields, setFields] = useState(initialSettings.fields)
+  const [style, setStyle] = useState(initialSettings.style)
   const [outputFormat, setOutputFormat] = useState('image/jpeg')
   const [isExporting, setIsExporting] = useState(false)
   const [loadedFontCss, setLoadedFontCss] = useState('')
@@ -130,6 +237,14 @@ export function TimestampEditor() {
   const imageUrlRef = useRef('')
   const dragStartRef = useRef(null)
 
+  const refreshAutomaticDateTime = useCallback(() => {
+    const currentTime = getLocalDateTime()
+    setDateTime(currentTime)
+    setFields((current) => current.map((field) => field.isDateTime
+      ? { ...field, value: formatDateTime(currentTime.date, currentTime.time, dateFormat, timeZone) }
+      : field))
+  }, [dateFormat, timeZone])
+
   const processImage = useCallback((file) => {
     if (!file?.type.startsWith('image/')) {
       setError('Selecione ou solte um arquivo de imagem compatível.')
@@ -138,6 +253,7 @@ export function TimestampEditor() {
     const objectUrl = URL.createObjectURL(file)
     const probe = new Image()
     probe.onload = () => {
+      if (dateTimeMode === 'automatic') refreshAutomaticDateTime()
       if (imageUrlRef.current) URL.revokeObjectURL(imageUrlRef.current)
       imageUrlRef.current = objectUrl
       setImage({ file, url: objectUrl, width: probe.naturalWidth, height: probe.naturalHeight, name: file.name || 'fotografia' })
@@ -149,12 +265,12 @@ export function TimestampEditor() {
       setError('Não foi possível abrir esta imagem. Tente outro arquivo.')
     }
     probe.src = objectUrl
-  }, [])
+  }, [dateTimeMode, refreshAutomaticDateTime])
 
   const font = TIMESTAMP_FONTS.find((option) => option.name === style.font) ?? TIMESTAMP_FONTS[0]
   const previewScale = previewWidth / 1920
   const timestampLines = fields.filter((field) => field.visible).map((field) => field.isDateTime
-    ? formatDateTime(dateTime.date, dateTime.time, dateFormat, timeZone)
+    ? formatDateTime(dateTime.date, dateTime.time, dateFormat, dateTimeMode === 'automatic' ? 'local' : timeZone)
     : field.value.trim()).filter(Boolean)
   const fontCss = `${style.weight} ${style.fontSize}px ${font.family}`
   const isFontReady = loadedFontCss === fontCss
@@ -202,6 +318,22 @@ export function TimestampEditor() {
     return () => window.clearTimeout(timer)
   }, [status])
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify({
+        fields,
+        dateTime,
+        dateTimeMode,
+        dateFormat,
+        timeZone,
+        style,
+      }))
+    } catch (storageError) {
+      console.error('Não foi possível salvar as configurações do timestamp.', storageError)
+      window.setTimeout(() => setError('Não foi possível salvar as configurações neste navegador.'), 0)
+    }
+  }, [fields, dateTime, dateTimeMode, dateFormat, timeZone, style])
+
   const setFieldValue = (id, value) => setFields((current) => current.map((field) => field.id === id ? { ...field, value } : field))
   const setFieldLabel = (id, label) => setFields((current) => current.map((field) => field.id === id ? { ...field, label } : field))
   const updateStyle = (key, value) => setStyle((current) => ({ ...current, [key]: value }))
@@ -212,6 +344,14 @@ export function TimestampEditor() {
     setFields((current) => current.map((field) => field.isDateTime
       ? { ...field, value: formatDateTime(next.date, next.time, dateFormat, timeZone) }
       : field))
+  }
+
+  const setAutomaticDateTime = (mode) => {
+    setDateTimeMode(mode)
+    if (mode === 'automatic') {
+      setTimeZone('local')
+      refreshAutomaticDateTime()
+    }
   }
 
   const updateDateFormat = (value) => {
@@ -234,8 +374,8 @@ export function TimestampEditor() {
     processImage(event.dataTransfer.files?.[0])
   }
 
-  const addCustomField = () => setFields((current) => [...current, { id: `custom-${createId()}`, label: 'Novo campo', value: '', visible: true }])
-  const removeField = (id) => setFields((current) => current.filter((field) => field.id !== id))
+  const addCustomField = () => setFields((current) => [...current, { id: `custom-${createId()}`, label: 'Novo campo', value: '', visible: true, isCustom: true }])
+  const removeField = (id) => setFields((current) => current.filter((field) => field.id !== id || !field.isCustom))
   const toggleField = (id) => setFields((current) => current.map((field) => field.id === id ? { ...field, visible: !field.visible } : field))
   const moveField = (id, offset) => setFields((current) => {
     const index = current.findIndex((field) => field.id === id)
@@ -254,14 +394,19 @@ export function TimestampEditor() {
     verticalAnchor: preset.anchor,
   }))
 
-  const restoreDefaults = () => {
+  const restoreTimestampDefaults = () => {
     const currentTime = getLocalDateTime()
     setDateTime(currentTime)
-    setDateFormat('dd/MM/yyyy HH:mm:ss')
+    setDateTimeMode('automatic')
+    setDateFormat('camera')
     setTimeZone('local')
     setFields(getDefaultFields(currentTime))
-    setStyle(DEFAULT_STYLE)
-    setStatus('Configuração padrão restaurada.')
+    setStatus('Valores padrão do timestamp restaurados.')
+  }
+
+  const restoreStyleDefaults = () => {
+    setStyle({ ...DEFAULT_STYLE })
+    setStatus('Estilo visual padrão restaurado.')
   }
 
   const persistPresets = (nextPresets) => {
@@ -280,7 +425,7 @@ export function TimestampEditor() {
       setError('Digite um nome para o preset.')
       return
     }
-    const preset = { id: createId(), name, style, fields: fields.map((field) => ({ ...field })), dateFormat, timeZone, dateTime }
+    const preset = { id: createId(), name, style, fields: fields.map((field) => ({ ...field })), dateFormat, timeZone, dateTime, dateTimeMode }
     persistPresets([...presets, preset])
     setPresetName('')
     setError('')
@@ -291,10 +436,13 @@ export function TimestampEditor() {
     const preset = presets.find((option) => option.id === id)
     if (!preset) return
     setStyle({ ...DEFAULT_STYLE, ...preset.style })
-    setFields(preset.fields.map((field) => ({ ...field })))
+    const presetMode = preset.dateTimeMode === 'manual' ? 'manual' : preset.dateTimeMode === 'automatic' ? 'automatic' : preset.dateTime ? 'manual' : dateTimeMode
+    const presetDateTime = presetMode === 'automatic' ? getLocalDateTime() : preset.dateTime ?? dateTime
+    setFields(normalizeFields(preset.fields, presetDateTime))
     setDateFormat(preset.dateFormat ?? 'dd/MM/yyyy HH:mm:ss')
-    setTimeZone(preset.timeZone ?? 'local')
-    if (preset.dateTime) setDateTime(preset.dateTime)
+    setTimeZone(presetMode === 'automatic' ? 'local' : preset.timeZone ?? 'local')
+    setDateTime(presetDateTime)
+    setDateTimeMode(presetMode)
     setSelectedPreset(id)
     setStatus(`Preset "${preset.name}" aplicado.`)
   }
@@ -369,7 +517,10 @@ export function TimestampEditor() {
           <div className="timestamp-title-icon"><Camera size={21} /></div>
           <div><span className="eyebrow">FERRAMENTA DE IMAGEM</span><h1>TIMESTAMP FOTOGRÁFICO</h1><p>Editor de informações sobre fotografias</p></div>
         </div>
-        {image && <button className="timestamp-reset-button" onClick={restoreDefaults}><RotateCcw size={15} /> Restaurar padrão</button>}
+        <div className="timestamp-heading-actions">
+          <button className="timestamp-reset-button" onClick={restoreTimestampDefaults}><RotateCcw size={15} /> RESTAURAR VALORES PADRÃO</button>
+          <button className="timestamp-reset-button" onClick={restoreStyleDefaults}><RotateCcw size={15} /> Restaurar estilo visual</button>
+        </div>
       </header>
 
       {status && <div className="timestamp-status" role="status"><Check size={16} />{status}</div>}
@@ -421,12 +572,18 @@ export function TimestampEditor() {
               <div className="timestamp-panel-heading"><div><span className="timestamp-section-kicker">EDITOR</span><h2>Configurações</h2></div><Clock3 size={18} /></div>
 
               <section className="timestamp-control-section">
-                <h3>Data e hora</h3>
+                <div className="timestamp-datetime-heading">
+                  <h3>Data e hora</h3>
+                  <div className="timestamp-mode-toggle" role="group" aria-label="Modo da data e hora">
+                    <button className={dateTimeMode === 'automatic' ? 'is-selected' : ''} onClick={() => setAutomaticDateTime('automatic')}>AUTOMÁTICO</button>
+                    <button className={dateTimeMode === 'manual' ? 'is-selected' : ''} onClick={() => setAutomaticDateTime('manual')}>MANUAL</button>
+                  </div>
+                </div>
                 <div className="timestamp-control-grid two-controls">
-                  <label className="timestamp-control"><span>Data</span><input type="date" value={dateTime.date} onChange={(event) => updateDateTime('date', event.target.value)} /></label>
-                  <label className="timestamp-control"><span>Hora</span><input type="time" step="1" value={dateTime.time} onChange={(event) => updateDateTime('time', event.target.value)} /></label>
-                  <label className="timestamp-control"><span>Formato</span><select value={dateFormat} onChange={(event) => updateDateFormat(event.target.value)}><option value="dd/MM/yyyy HH:mm:ss">30/10/2026 09:30:15</option><option value="long">30 de outubro de 2026 09:30:15</option><option value="short">30 OUT 2026 09:30</option><option value="iso">2026-10-30 09:30:15</option></select></label>
-                  <label className="timestamp-control"><span>Fuso horário</span><select value={timeZone} onChange={(event) => updateTimeZone(event.target.value)}><option value="local">Local do dispositivo</option><option value="America/Fortaleza">America/Fortaleza</option><option value="UTC">UTC</option></select></label>
+                  <label className="timestamp-control"><span>Data</span><input type="date" value={dateTime.date} disabled={dateTimeMode === 'automatic'} onChange={(event) => updateDateTime('date', event.target.value)} /></label>
+                  <label className="timestamp-control"><span>Hora</span><input type="time" step="1" value={dateTime.time} disabled={dateTimeMode === 'automatic'} onChange={(event) => updateDateTime('time', event.target.value)} /></label>
+                  <label className="timestamp-control"><span>Formato</span><select value={dateFormat} onChange={(event) => updateDateFormat(event.target.value)}><option value="camera">30 de out. de 2026 11:26:35</option><option value="dd/MM/yyyy HH:mm:ss">30/10/2026 11:26:35</option><option value="long">30 de outubro de 2026 11:26:35</option><option value="short">30 OUT 2026 11:26</option><option value="iso">2026-10-30 11:26:35</option></select></label>
+                  <label className="timestamp-control"><span>Fuso horário</span><select value={timeZone} disabled={dateTimeMode === 'automatic'} onChange={(event) => updateTimeZone(event.target.value)}><option value="local">Local do dispositivo</option><option value="America/Fortaleza">America/Fortaleza</option><option value="UTC">UTC</option></select></label>
                 </div>
               </section>
 
@@ -440,7 +597,7 @@ export function TimestampEditor() {
                         <input aria-label="Nome do campo" value={field.label} onChange={(event) => setFieldLabel(field.id, event.target.value)} />
                         <button className="timestamp-icon-action" disabled={index === 0} onClick={() => moveField(field.id, -1)} aria-label="Mover campo para cima"><ArrowUp size={14} /></button>
                         <button className="timestamp-icon-action" disabled={index === fields.length - 1} onClick={() => moveField(field.id, 1)} aria-label="Mover campo para baixo"><ArrowDown size={14} /></button>
-                        {!field.isDateTime && <button className="timestamp-icon-action danger-action" onClick={() => removeField(field.id)} aria-label="Remover campo"><Trash2 size={14} /></button>}
+                        {field.isCustom && <button className="timestamp-icon-action danger-action" onClick={() => removeField(field.id)} aria-label="Remover campo"><Trash2 size={14} /></button>}
                       </div>
                       {!field.isDateTime && <input className="timestamp-field-value" value={field.value} onChange={(event) => setFieldValue(field.id, event.target.value)} placeholder={`Digite ${field.label.toLocaleLowerCase('pt-BR')}...`} />}
                     </div>
