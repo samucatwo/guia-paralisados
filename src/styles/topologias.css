@@ -1,0 +1,938 @@
+/* ============================================================
+   MÓDULO TOPOLOGIAS — GUIA EACE
+   Identidade Dark Blue / Light Theme nativo do GUIA EACE
+   ============================================================ */
+
+.topologia-page {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  animation: rise .45s ease both;
+  width: 100%;
+}
+
+/* Header & Breadcrumb do Módulo */
+.topologia-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topologia-breadcrumb-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-soft);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+}
+
+.topologia-breadcrumb-bar .crumb-active {
+  color: var(--accent);
+}
+
+.topologia-breadcrumb-bar .crumb-sep {
+  color: var(--border-strong);
+}
+
+.topologia-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.topologia-title-row h1 {
+  margin: 0;
+  color: var(--text-h);
+  font: 700 clamp(28px, 3.4vw, 42px)/1.1 var(--heading);
+  letter-spacing: -.03em;
+}
+
+.topologia-title-row p {
+  margin: 8px 0 0;
+  max-width: 720px;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.topologia-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  background: var(--accent-bg);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  white-space: nowrap;
+}
+
+/* Seletor de Modo / Variantes (COM SWITCH / SEM SWITCH) */
+.topology-mode-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.topology-mode-selector-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.topology-mode-selector-heading span {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-soft);
+}
+
+.topology-mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.topology-mode-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-radius: 7px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+  text-align: left;
+  transition: all .2s ease;
+}
+
+.topology-mode-card:hover {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+}
+
+.topology-mode-card.is-active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  box-shadow: 0 0 0 1px var(--accent-border);
+}
+
+.topology-mode-info strong {
+  display: block;
+  font: 700 15px var(--heading);
+  color: var(--text-h);
+  letter-spacing: .02em;
+}
+
+.topology-mode-info span {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.topology-mode-card.is-active .topology-mode-info strong {
+  color: var(--accent);
+}
+
+.topology-mode-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+/* Área do Diagrama Gráfico */
+.diagram-container-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.diagram-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-wrap: wrap;
+}
+
+.diagram-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.diagram-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.diagram-filter-btn:hover {
+  border-color: var(--border-strong);
+  color: var(--text-h);
+}
+
+.diagram-filter-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.filter-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.filter-dot.network { background: #38bdf8; }
+.filter-dot.poe { background: #10b981; }
+.filter-dot.power { background: #f59e0b; }
+.filter-dot.all { background: var(--accent); }
+
+.diagram-zoom-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.diagram-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all .15s ease;
+}
+
+.diagram-action-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Área de Visualização com Scroll Horizontal Responsivo */
+.diagram-viewport {
+  position: relative;
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: radial-gradient(circle at 50% 50%, rgba(93, 169, 255, 0.04) 0%, transparent 80%), var(--bg);
+  padding: 24px 16px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+:root[data-theme='light'] .diagram-viewport {
+  background: radial-gradient(circle at 50% 50%, rgba(40, 119, 213, 0.04) 0%, transparent 80%), #edf2f9;
+}
+
+.diagram-canvas-wrap {
+  position: relative;
+  width: 1200px;
+  height: 740px;
+  margin: 0 auto;
+}
+
+/* Camada SVG de Conexões */
+.diagram-svg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.diagram-svg-layer path {
+  pointer-events: stroke;
+  cursor: pointer;
+}
+
+/* Estilos de Linhas */
+.conn-line {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke-width .2s, stroke-opacity .2s, stroke .2s;
+}
+
+.conn-line.network {
+  stroke: #38bdf8;
+  stroke-width: 2.4;
+}
+
+.conn-line.poe {
+  stroke: #10b981;
+  stroke-width: 2.8;
+}
+
+.conn-line.power {
+  stroke: #f59e0b;
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+/* Estados de Destaque das Linhas */
+.conn-line.is-dimmed {
+  stroke-opacity: 0.12 !important;
+}
+
+.conn-line.is-highlighted {
+  stroke-width: 4 !important;
+  stroke-opacity: 1 !important;
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* Badges e Rótulos das Portas nas Linhas */
+.conn-label-group {
+  cursor: pointer;
+  pointer-events: all;
+  transition: transform .2s ease;
+}
+
+.conn-label-group:hover,
+.conn-label-group.is-highlighted {
+  transform: scale(1.08);
+}
+
+.conn-badge-rect {
+  rx: 4px;
+  ry: 4px;
+  fill: var(--surface);
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  transition: all .2s;
+}
+
+.conn-badge-rect.network {
+  stroke: rgba(56, 189, 248, 0.5);
+  fill: rgba(14, 25, 42, 0.92);
+}
+
+.conn-badge-rect.poe {
+  stroke: rgba(16, 185, 129, 0.5);
+  fill: rgba(11, 29, 27, 0.92);
+}
+
+.conn-badge-rect.power {
+  stroke: rgba(245, 158, 11, 0.5);
+  fill: rgba(30, 24, 13, 0.92);
+}
+
+:root[data-theme='light'] .conn-badge-rect.network {
+  stroke: #38bdf8;
+  fill: #f0f9ff;
+}
+:root[data-theme='light'] .conn-badge-rect.poe {
+  stroke: #10b981;
+  fill: #ecfdf5;
+}
+:root[data-theme='light'] .conn-badge-rect.power {
+  stroke: #f59e0b;
+  fill: #fffbeb;
+}
+
+.conn-badge-text {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+  letter-spacing: .02em;
+}
+
+.conn-badge-text.network { fill: #38bdf8; }
+.conn-badge-text.poe { fill: #10b981; }
+.conn-badge-text.power { fill: #f59e0b; }
+
+/* Nós de Equipamento (Cards sobrepostos) */
+.equipment-node {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.28);
+  cursor: pointer;
+  transition: all .22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  box-sizing: border-box;
+}
+
+:root[data-theme='light'] .equipment-node {
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.equipment-node:hover,
+.equipment-node.is-hovered {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-border), 0 8px 24px rgba(93, 169, 255, 0.22);
+  transform: translateY(-3px) scale(1.02);
+  z-index: 12;
+}
+
+.equipment-node.is-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent), 0 10px 28px rgba(93, 169, 255, 0.3);
+  z-index: 15;
+}
+
+.equipment-node.is-dimmed {
+  opacity: 0.28;
+  filter: grayscale(40%);
+}
+
+.equipment-node.central-node {
+  border-color: rgba(93, 169, 255, 0.45);
+  background: linear-gradient(180deg, var(--surface) 0%, rgba(93, 169, 255, 0.05) 100%);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.node-badge {
+  font-size: 8px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  padding: 2px 6px;
+  border-radius: 3px;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.node-image-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  padding: 4px;
+}
+
+.node-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+  transition: transform .2s ease;
+}
+
+.equipment-node:hover .node-image {
+  transform: scale(1.04);
+}
+
+.node-footer {
+  margin-top: 6px;
+  text-align: center;
+}
+
+.node-name {
+  display: block;
+  font: 700 11px/1.2 var(--heading);
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.node-subtext {
+  display: block;
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Tooltip / Modal Inspector Flutuante do Equipamento */
+.diagram-inspector {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  max-width: 360px;
+  padding: 16px 18px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+  z-index: 30;
+  animation: rise .2s ease both;
+}
+
+:root[data-theme='light'] .diagram-inspector {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.inspector-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.inspector-header strong {
+  font: 700 14px var(--heading);
+  color: var(--text-h);
+  text-transform: uppercase;
+  letter-spacing: .02em;
+}
+
+.inspector-close {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--text-soft);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+}
+
+.inspector-close:hover {
+  color: var(--text-h);
+  background: var(--surface-hover);
+}
+
+.inspector-desc {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.inspector-ports-title {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.inspector-ports-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.inspector-ports-list li {
+  font-size: 11px;
+  color: var(--text-h);
+  background: var(--bg);
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+/* Tooltip de Conexão */
+.connection-inspector {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  max-width: 340px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  z-index: 30;
+  animation: rise .2s ease both;
+}
+
+.connection-inspector-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-bottom: 8px;
+}
+
+.connection-inspector-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.connection-inspector-row:last-child {
+  border-bottom: 0;
+}
+
+.connection-inspector-row span {
+  color: var(--text-soft);
+}
+
+.connection-inspector-row strong {
+  color: var(--text-h);
+  text-align: right;
+}
+
+/* LEGENDA VISUAL */
+.topology-legend-card {
+  padding: 20px 24px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.legend-title {
+  font: 700 12px var(--heading);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--text-h);
+  margin-bottom: 14px;
+}
+
+.legend-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.legend-swatch {
+  width: 28px;
+  height: 3px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-swatch.network {
+  background: #38bdf8;
+  box-shadow: 0 0 6px rgba(56, 189, 248, 0.4);
+}
+
+.legend-swatch.poe {
+  background: #10b981;
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.legend-swatch.power {
+  background: #f59e0b;
+  border: 1px dashed #f59e0b;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.4);
+}
+
+.legend-swatch.arrow {
+  width: auto;
+  height: auto;
+  background: none;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* SEÇÃO DE EQUIPAMENTOS DA TOPOLOGIA */
+.topology-equipments-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.equipments-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.equipments-section-header h2 {
+  margin: 0;
+  font: 700 20px var(--heading);
+  color: var(--text-h);
+}
+
+.equipments-section-header p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.equipments-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+}
+
+.equipment-summary-card {
+  display: flex;
+  flex-direction: column;
+  padding: 18px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all .2s ease;
+  position: relative;
+}
+
+.equipment-summary-card:hover {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+}
+
+.equipment-summary-card.is-active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-border);
+}
+
+.card-thumb-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 95px;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+
+.card-thumb {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.card-details strong {
+  display: block;
+  font: 700 13px var(--heading);
+  color: var(--text-h);
+}
+
+.card-role {
+  display: block;
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.card-desc {
+  margin: 8px 0 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-ports-tag {
+  margin-top: auto;
+  font-size: 10px;
+  color: var(--text-soft);
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+
+/* SEÇÃO COMO A TOPOLOGIA FUNCIONA */
+.topology-operational-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.operational-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+.operational-step-card {
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  transition: transform .2s ease;
+}
+
+.operational-step-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+}
+
+.step-number-badge {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font: 700 13px var(--heading);
+  border: 1px solid var(--accent-border);
+}
+
+.step-text strong {
+  display: block;
+  font: 700 13px var(--heading);
+  color: var(--text-h);
+  margin-bottom: 4px;
+}
+
+.step-text p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+/* ESTADO: EM BREVE (COM SWITCH, TOPOLOGIA 4.2, TOPOLOGIA 5.0) */
+.topology-placeholder-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 360px;
+  padding: 50px 24px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  text-align: center;
+  gap: 14px;
+}
+
+.placeholder-icon-wrap {
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.topology-placeholder-card h2 {
+  margin: 0;
+  font: 700 22px var(--heading);
+  color: var(--text-h);
+}
+
+.topology-placeholder-card p {
+  margin: 0;
+  max-width: 440px;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 900px) {
+  .topology-mode-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .diagram-viewport {
+    padding: 16px 8px;
+  }
+}
+
+@media (max-width: 620px) {
+  .topologia-title-row {
+    flex-direction: column;
+  }
+
+  .diagram-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .diagram-inspector {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    max-width: none;
+  }
+
+  .connection-inspector {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    max-width: none;
+  }
+}
+
